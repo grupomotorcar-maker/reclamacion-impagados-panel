@@ -40,12 +40,12 @@ textarea{width:210px;min-height:50px;padding:5px 6px;border-radius:6px;border:1p
 .check-row{display:flex;align-items:center;gap:5px;margin-top:5px;font-size:10.5px;color:#667085;}
 .saved-flag{font-size:10px;color:#1e7d4f;margin-left:4px;}
 </style></head><body>
-<h1>ReclamaciÃ³n de Impagados â Grupo Motorcar</h1>
-<div class="sub">Lee y guarda en directo sobre la hoja "Impagados" del Sheet. Recarga esta pÃ¡gina tras usar "Cargar / Refrescar datos" en el menÃº de la Sheet para traer un informe nuevo.</div>
+<h1>Reclamación de Impagados — Grupo Motorcar</h1>
+<div class="sub">Lee y guarda en directo sobre la hoja "Impagados" del Sheet. Recarga esta página tras usar "Cargar / Refrescar datos" en el menú de la Sheet para traer un informe nuevo.</div>
 <div class="cards" id="cards">Cargando...</div>
 <div class="tabs"><div class="tab active" data-e="JM">JM</div><div class="tab" data-e="RM">RM</div><div class="tab" data-e="JTX">JTX</div></div>
-<div class="toolbar"><input type="text" id="search" placeholder="Buscar cliente o documento..."><select id="sortSel"><option value="importe_desc">Importe (mayor a menor)</option><option value="importe_asc">Importe (menor a mayor)</option><option value="dias_desc">DÃ­as vencido (mayor a menor)</option><option value="cliente_asc">Cliente (A-Z)</option></select><select id="yearSel"><option value="all">Todos los aÃ±os</option></select><select id="archivoSel"><option value="activas">Activas (pendientes)</option><option value="archivadas">Archivadas (cobradas)</option><option value="todas">Todas</option></select><select id="statusSel"><option value="all">Todos los estados</option><option value="Reclamar ya">Reclamar ya</option><option value="Aviso">Aviso</option><option value="Dentro de plazo">Dentro de plazo</option><option value="ExcepciÃ³n">ExcepciÃ³n</option><option value="Verificar pago (Mensaelect)">Verificar pago (Mensaelect)</option><option value="Rechazada">Rechazada</option><option value="Cobrada">Cobrada</option></select></div>
-<table><thead><tr><th style="width:22%">Cliente / Documento</th><th style="width:9%">Importe</th><th style="width:6%">DÃ­as</th><th style="width:13%">Estado</th><th style="width:12%">TelÃ©fono</th><th style="width:24%">Mensaje</th><th style="width:14%">AcciÃ³n</th></tr></thead><tbody id="tbody"><tr><td colspan="7">Cargando datos...</td></tr></tbody></table>
+<div class="toolbar"><input type="text" id="search" placeholder="Buscar cliente o documento..."><select id="sortSel"><option value="importe_desc">Importe (mayor a menor)</option><option value="importe_asc">Importe (menor a mayor)</option><option value="dias_desc">Días vencido (mayor a menor)</option><option value="cliente_asc">Cliente (A-Z)</option></select><select id="yearSel"><option value="all">Todos los años</option></select><select id="archivoSel"><option value="activas">Activas (pendientes)</option><option value="archivadas">Archivadas (cobradas)</option><option value="todas">Todas</option></select><select id="statusSel"><option value="all">Todos los estados</option><option value="Reclamar ya">Reclamar ya</option><option value="Aviso">Aviso</option><option value="Dentro de plazo">Dentro de plazo</option><option value="Excepción">Excepción</option><option value="Verificar pago (Mensaelect)">Verificar pago (Mensaelect)</option><option value="Rechazada">Rechazada</option><option value="Cobrada">Cobrada</option></select></div>
+<table><thead><tr><th style="width:22%">Cliente / Documento</th><th style="width:9%">Importe</th><th style="width:6%">Días</th><th style="width:13%">Estado</th><th style="width:12%">Teléfono</th><th style="width:24%">Mensaje</th><th style="width:14%">Acción</th></tr></thead><tbody id="tbody"><tr><td colspan="7">Cargando datos...</td></tr></tbody></table>
 <script>
 var ALL_ROWS = []; var ACTIVE = "JM"; var CARGA_OK = false; var CARGA_INTENTOS = 0; var CARGA_MAX_INTENTOS = 5;
 var EXEC_URL = "https://script.google.com/a/macros/grupomotorcar.com/s/AKfycbzfaQuv550seYqjAxmk0k6PCiQDOjbJpG_yaP7HLRoFbze0PwwkDivj3fu9lxl4Eck/exec";
@@ -66,7 +66,7 @@ function apiCall(action, params, onSuccess, onError) {
     .then(function(resp){ if (resp && resp.ok) { onSuccess(resp.result); } else { (onError||function(){})((resp && resp.error) || "Error desconocido."); } })
     .catch(function(e){ (onError||function(){})(e); });
 }
-var NIVEL_LABELS_JS = {1:"1er aviso",2:"2Âº aviso",3:"Ãºltimo aviso",4:"aviso final (vÃ­a judicial)"};
+var NIVEL_LABELS_JS = {1:"1er aviso",2:"2º aviso",3:"último aviso",4:"aviso final (vía judicial)"};
 function hoyStr(){ var d=new Date(); function p(n){return (n<10?"0":"")+n;} return p(d.getDate())+"/"+p(d.getMonth()+1)+"/"+d.getFullYear(); }
 function mostrarDiagnostico(msg) {
   document.getElementById("cards").innerHTML = "<div class=\"card red\"><div class=\"label\">No se pudieron cargar los datos</div><div class=\"value\" style=\"font-size:13px;\">" + msg + "</div></div>";
@@ -78,10 +78,10 @@ function cargar() {
   var miIntento = CARGA_INTENTOS;
   if (miIntento > 1) { document.getElementById("cards").innerHTML = "Cargando... (intento " + miIntento + " de " + CARGA_MAX_INTENTOS + ")"; }
   setTimeout(function() { if (!CARGA_OK && miIntento === CARGA_INTENTOS) { if (miIntento < CARGA_MAX_INTENTOS) { cargar(); } else { mostrarDiagnostico("La llamada al servidor no respondi\u00f3 tras " + CARGA_MAX_INTENTOS + " intentos (" + (CARGA_MAX_INTENTOS*12) + "s). Puede ser un problema temporal de Google Apps Script. <a href=\"#\" onclick=\"reintentar(); return false;\">Reintentar</a>."); } } }, 12000);
-  apiGetData(function(resp){ CARGA_OK = true; if (!resp || !resp.ok) { mostrarDiagnostico("Error del servidor: " + ((resp && resp.error) || "respuesta vacÃ­a") + (resp && resp.stack ? ("\n" + resp.stack) : "")); return; } try { ALL_ROWS = resp.rows || []; poblarAnios(); render(); } catch(e) { document.getElementById("cards").innerHTML = "<pre style=\"color:#c00;white-space:pre-wrap;background:#fff;padding:8px;border:1px solid #c00;\">Error al mostrar datos: " + String((e && e.stack) || e).replace(/</g,"&lt;") + "</pre>"; } }, function(err){ if (CARGA_INTENTOS < CARGA_MAX_INTENTOS) { cargar(); } else { CARGA_OK = true; mostrarDiagnostico((err && err.message ? err.message : err) || "Error desconocido."); } });
+  apiGetData(function(resp){ CARGA_OK = true; if (!resp || !resp.ok) { mostrarDiagnostico("Error del servidor: " + ((resp && resp.error) || "respuesta vacía") + (resp && resp.stack ? ("\n" + resp.stack) : "")); return; } try { ALL_ROWS = resp.rows || []; poblarAnios(); render(); } catch(e) { document.getElementById("cards").innerHTML = "<pre style=\"color:#c00;white-space:pre-wrap;background:#fff;padding:8px;border:1px solid #c00;\">Error al mostrar datos: " + String((e && e.stack) || e).replace(/</g,"&lt;") + "</pre>"; } }, function(err){ if (CARGA_INTENTOS < CARGA_MAX_INTENTOS) { cargar(); } else { CARGA_OK = true; mostrarDiagnostico((err && err.message ? err.message : err) || "Error desconocido."); } });
 }
-function poblarAnios() { var sel = document.getElementById("yearSel"); var existing = {}; for (var i=0;i<sel.options.length;i++) existing[sel.options[i].value]=true; var years = {}; if (ALL_ROWS) { ALL_ROWS.forEach(function(r){ years[String(r.vencimiento).slice(0,4)] = true; }); } else { console.warn("Aviso: ALL_ROWS vino null/undefined, no se pueden poblar los aÃ±os."); } Object.keys(years).sort().reverse().forEach(function(y){ if (!existing[y]) { var opt=document.createElement("option"); opt.value=y; opt.textContent=y; sel.appendChild(opt); } }); }
-function fmt(n) { return Number(n).toLocaleString("es-ES",{minimumFractionDigits:2}) + "â¬"; }
+function poblarAnios() { var sel = document.getElementById("yearSel"); var existing = {}; for (var i=0;i<sel.options.length;i++) existing[sel.options[i].value]=true; var years = {}; if (ALL_ROWS) { ALL_ROWS.forEach(function(r){ years[String(r.vencimiento).slice(0,4)] = true; }); } else { console.warn("Aviso: ALL_ROWS vino null/undefined, no se pueden poblar los años."); } Object.keys(years).sort().reverse().forEach(function(y){ if (!existing[y]) { var opt=document.createElement("option"); opt.value=y; opt.textContent=y; sel.appendChild(opt); } }); }
+function fmt(n) { return Number(n).toLocaleString("es-ES",{minimumFractionDigits:2}) + "€"; }
 function waLink(phone, msg) { var digits = (phone||"").replace(/[^0-9+]/g,"").replace(/^\+/,""); if (digits.length>0 && digits.length<=9) digits = "34"+digits; return "https://wa.me/" + digits + "?text=" + encodeURIComponent(msg||""); }
 function render() {
   var rows = ALL_ROWS.filter(function(r){ return r.entidad === ACTIVE; });
@@ -107,22 +107,22 @@ function render() {
   var cobradasRows = ALL_ROWS.filter(function(r){return r.entidad===ACTIVE && r.cobrada;});
   var cobradasTotal = cobradasRows.reduce(function(s,r){return s+r.importe;},0);
   document.getElementById("cards").innerHTML =
-    "<div class=\"card\"><div class=\"label\">Total " + ACTIVE + " (pendiente)</div><div class=\"value\">" + fmt(total) + " Â· " + totalAll.length + "</div></div>" +
-    "<div class=\"card red\"><div class=\"label\">A reclamar ya</div><div class=\"value\">" + fmt(reclamarTotal) + " Â· " + reclamarRows.length + "</div></div>" +
+    "<div class=\"card\"><div class=\"label\">Total " + ACTIVE + " (pendiente)</div><div class=\"value\">" + fmt(total) + " · " + totalAll.length + "</div></div>" +
+    "<div class=\"card red\"><div class=\"label\">A reclamar ya</div><div class=\"value\">" + fmt(reclamarTotal) + " · " + reclamarRows.length + "</div></div>" +
     "<div class=\"card blue\"><div class=\"label\">Aseguradoras (canal formal)</div><div class=\"value\">" + asegRows.length + "</div></div>" +
-    "<div class=\"card green\"><div class=\"label\">Cobradas (archivadas)</div><div class=\"value\">" + fmt(cobradasTotal) + " Â· " + cobradasRows.length + "</div></div>";
+    "<div class=\"card green\"><div class=\"label\">Cobradas (archivadas)</div><div class=\"value\">" + fmt(cobradasTotal) + " · " + cobradasRows.length + "</div></div>";
   var tbody = document.getElementById("tbody"); tbody.innerHTML = "";
   rows.forEach(function(r) {
     var tr = document.createElement("tr"); if (r.cobrada) tr.className = "cobrada-row"; else if (r.aseguradora) tr.className = "aseguradora";
-    var estadoClass = r.estado === "Reclamar ya" ? "reclamar" : r.estado === "Aviso" ? "aviso" : r.estado === "ExcepciÃ³n" ? "excepcion" : r.estado === "Verificar pago (Mensaelect)" ? "verificar" : r.estado === "Rechazada" ? "rechazada" : r.estado === "Cobrada" ? "cobrada" : "plazo";
+    var estadoClass = r.estado === "Reclamar ya" ? "reclamar" : r.estado === "Aviso" ? "aviso" : r.estado === "Excepción" ? "excepcion" : r.estado === "Verificar pago (Mensaelect)" ? "verificar" : r.estado === "Rechazada" ? "rechazada" : r.estado === "Cobrada" ? "cobrada" : "plazo";
     var tipoBadge = r.aseguradora ? "<span class=\"badge aseg\">Aseguradora</span>" : "";
     var td1 = document.createElement("td");
-    td1.innerHTML = "<div class=\"cliente\">" + r.cliente + tipoBadge + "</div><div class=\"meta\">Doc. " + r.documento + " Â· " + r.forma + " Â· venc. " + r.vencimiento + "</div>";
+    td1.innerHTML = "<div class=\"cliente\">" + r.cliente + tipoBadge + "</div><div class=\"meta\">Doc. " + r.documento + " · " + r.forma + " · venc. " + r.vencimiento + "</div>";
     var td2 = document.createElement("td"); td2.textContent = fmt(r.importe); td2.style.fontWeight="700";
     var td3 = document.createElement("td"); td3.textContent = r.dias;
     var td4 = document.createElement("td"); td4.innerHTML = "<span class=\"badge " + estadoClass + "\">" + r.estado + "</span>";
     var td5 = document.createElement("td");
-    var telInput = document.createElement("input"); telInput.type="tel"; telInput.value=r.telefono; telInput.placeholder="6xx xxx xxx (34 se aÃ±ade solo)"; if (r.aseguradora) telInput.disabled=true;
+    var telInput = document.createElement("input"); telInput.type="tel"; telInput.value=r.telefono; telInput.placeholder="6xx xxx xxx (34 se añade solo)"; if (r.aseguradora) telInput.disabled=true;
     td5.appendChild(telInput);
     var td6 = document.createElement("td");
     var msgArea = document.createElement("textarea"); msgArea.value = r.mensaje; td6.appendChild(msgArea);
@@ -131,7 +131,7 @@ function render() {
     if (r.cobrada) {
       var doneDiv = document.createElement("div"); doneDiv.style.cssText="color:#1e7d4f;font-weight:600;font-size:11px;"; doneDiv.textContent = "Cobrada " + r.fechaCobro + " (" + r.metodoCobro + ")"; td7.appendChild(doneDiv);
       var undoA = document.createElement("a"); undoA.href="#"; undoA.className="btn-undo-cobro"; undoA.textContent="deshacer cobro"; td7.appendChild(undoA);
-      undoA.addEventListener("click", function(ev){ ev.preventDefault(); if (confirm("Â¿Deshacer el cobro registrado?")) { apiCall("deshacerCobroWeb", [r.rowIndex], cargar, function(err){ alert("Error al deshacer el cobro: " + err); }); } });
+      undoA.addEventListener("click", function(ev){ ev.preventDefault(); if (confirm("¿Deshacer el cobro registrado?")) { apiCall("deshacerCobroWeb", [r.rowIndex], cargar, function(err){ alert("Error al deshacer el cobro: " + err); }); } });
     } else {
       if (r.estadoMensaelect === "verificar_pago") {
         var noteV = document.createElement("span"); noteV.className="mensaelect-note verificar"; noteV.innerHTML = "<b>Mensaelect indica pagada:</b> " + r.notaMensaelect; td7.appendChild(noteV);
@@ -140,21 +140,21 @@ function render() {
       } else if (r.aseguradora) {
         var note = document.createElement("span"); note.className="formal-note"; note.textContent="Canal formal: email/tel. al gestor de siniestros, no WhatsApp."; td7.appendChild(note);
       } else {
-        waBtn = document.createElement("a"); waBtn.className = "wa-btn" + ((!r.telefono || r.estado==="ExcepciÃ³n") ? " disabled":""); waBtn.target="_blank"; waBtn.rel="noopener"; waBtn.textContent="Enviar WhatsApp"; waBtn.href = waLink(r.telefono, r.mensaje); td7.appendChild(waBtn);
+        waBtn = document.createElement("a"); waBtn.className = "wa-btn" + ((!r.telefono || r.estado==="Excepción") ? " disabled":""); waBtn.target="_blank"; waBtn.rel="noopener"; waBtn.textContent="Enviar WhatsApp"; waBtn.href = waLink(r.telefono, r.mensaje); td7.appendChild(waBtn);
       }
       var histDiv = document.createElement("div"); histDiv.className="meta"; histDiv.style.marginTop="4px";
-      histDiv.textContent = r.nivelReclamacion ? ("Reclamada " + r.nivelReclamacion + "x Â· " + NIVEL_LABELS_JS[r.nivelReclamacion]) : "Sin reclamaciones registradas";
+      histDiv.textContent = r.nivelReclamacion ? ("Reclamada " + r.nivelReclamacion + "x · " + NIVEL_LABELS_JS[r.nivelReclamacion]) : "Sin reclamaciones registradas";
       td7.appendChild(histDiv);
       var actionRow = document.createElement("div"); actionRow.className="check-row";
-      var btnReclamar = document.createElement("button"); btnReclamar.type="button"; btnReclamar.className="btn-reclamar"; btnReclamar.textContent="Registrar reclamaciÃ³n";
+      var btnReclamar = document.createElement("button"); btnReclamar.type="button"; btnReclamar.className="btn-reclamar"; btnReclamar.textContent="Registrar reclamación";
       var btnCobrada = document.createElement("button"); btnCobrada.type="button"; btnCobrada.className="btn-cobrada"; btnCobrada.textContent="Cobrada";
       actionRow.appendChild(btnReclamar); actionRow.appendChild(btnCobrada); td7.appendChild(actionRow);
-      btnReclamar.addEventListener("click", function(){ apiCall("registrarReclamacionWeb", [r.rowIndex], cargar, function(err){ alert("Error al registrar la reclamaciÃ³n: " + err); }); });
-      btnCobrada.addEventListener("click", function(){ var f = prompt("Â¿CuÃ¡ndo se cobrÃ³? (dd/mm/aaaa)", hoyStr()); if (!f) return; var m = prompt("Â¿CÃ³mo se cobrÃ³? (efectivo / transferencia / tarjeta / otro)", "transferencia"); if (!m) return; apiCall("marcarCobradaWeb", [r.rowIndex, f, m], cargar, function(err){ alert("Error al marcar como cobrada: " + err); }); });
+      btnReclamar.addEventListener("click", function(){ apiCall("registrarReclamacionWeb", [r.rowIndex], cargar, function(err){ alert("Error al registrar la reclamación: " + err); }); });
+      btnCobrada.addEventListener("click", function(){ var f = prompt("¿Cuándo se cobró? (dd/mm/aaaa)", hoyStr()); if (!f) return; var m = prompt("¿Cómo se cobró? (efectivo / transferencia / tarjeta / otro)", "transferencia"); if (!m) return; apiCall("marcarCobradaWeb", [r.rowIndex, f, m], cargar, function(err){ alert("Error al marcar como cobrada: " + err); }); });
     }
     tr.appendChild(td1); tr.appendChild(td2); tr.appendChild(td3); tr.appendChild(td4); tr.appendChild(td5); tr.appendChild(td6); tr.appendChild(td7);
     tbody.appendChild(tr);
-    telInput.addEventListener("change", function(){ apiCall("guardarCampoWeb", [r.rowIndex, "telefono", telInput.value], function(){}, function(err){ console.warn("No se pudo guardar el telÃ©fono: " + err); }); if (waBtn) { waBtn.href = waLink(telInput.value, msgArea.value); waBtn.className = "wa-btn" + ((!telInput.value) ? " disabled":""); } });
+    telInput.addEventListener("change", function(){ apiCall("guardarCampoWeb", [r.rowIndex, "telefono", telInput.value], function(){}, function(err){ console.warn("No se pudo guardar el teléfono: " + err); }); if (waBtn) { waBtn.href = waLink(telInput.value, msgArea.value); waBtn.className = "wa-btn" + ((!telInput.value) ? " disabled":""); } });
     msgArea.addEventListener("change", function(){ apiCall("guardarCampoWeb", [r.rowIndex, "mensaje", msgArea.value], function(){}, function(err){ console.warn("No se pudo guardar el mensaje: " + err); }); if (waBtn) waBtn.href = waLink(telInput.value, msgArea.value); });
   });
 }
